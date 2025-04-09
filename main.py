@@ -1,36 +1,26 @@
 from GameVis import GameVisualizer
-from env import CombatArenaEnv
+from new_env import CombatArenaEnv
+from example_agent import MultiUnitAgent
 
 if __name__ == "__main__":
     env = CombatArenaEnv()
-    agent_A = TacticalAgent(name="Tactical A")
-    agent_B = RandomAgent(name="Random B")
+    agent_A = MultiUnitAgent(name="Squad A")
+    agent_B = MultiUnitAgent(name="Squad B")
     
-    # Create visualizer
     vis = GameVisualizer(env)
     
-    # Reset environment
-    obs = env.reset()
+    obs_A, obs_B = env.reset()
     done = False
     
-    # Capture initial state
     vis.capture_frame()
     
     while not done:
-        # Get observations for both agents
-        obs_A = env.get_observation_for_agent(is_agent_one=True)
-        obs_B = env.get_observation_for_agent(is_agent_one=False)
+        actions_A = agent_A.select_actions(obs_A)
+        actions_B = agent_B.select_actions(obs_B)
         
-        # Get actions from agents
-        action_A = agent_A.select_action(obs_A)
-        action_B = agent_B.select_action(obs_B)
+        obs_A, obs_B, rewards, done, info = env.step((actions_A, actions_B))
         
-        # Step environment
-        obs1, obs2, rewards, done, info = env.step((action_A, action_B))
-        
-        # Capture frame
         vis.capture_frame()
         print(f"Rewards: {rewards}\n")
     
-    # Save animation
-    vis.save_animation("game_replay.gif", fps=2)
+    vis.save_animation("multi_unit_battle.gif", fps=2)
